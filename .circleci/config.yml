@@ -43,7 +43,7 @@ jobs:
       - run:
           name: Build front-end
           command: |
-            cd frontent
+            cd frontend
             sudo npm install
             sudo npm run build
       - save_cache:
