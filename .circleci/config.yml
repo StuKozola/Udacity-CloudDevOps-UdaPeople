@@ -40,9 +40,20 @@ commands:
               exit 1
             fi
 
+  get-commit-message:
+    description: Get commit message for slack posts
+    steps:
+      - run:
+          name: Add commit message to env
+          when: always
+          command: |
+            echo "export COMMIT_MESSAGE=\"$(git log --format=%B -n 1 $CIRCLE_SHA1)\"" >> $BASH_ENV
+            source $BASH_ENV
+
   slack-fail-notify:
     description: Send failure notification to slack
     steps:
+      - get-commit-message
       - slack/notify:
           channel: C01L195LB4N
           event: pass
@@ -66,7 +77,7 @@ commands:
                     },
                     {
                       "type": "mrkdwn",
-                      "text": "Commit SHA: $CIRCLE_SHA1"
+                      "text": "-->$CIRCLE_USERNAME: $COMMIT_MESSAGE"
                     }
                   ]
                 },
