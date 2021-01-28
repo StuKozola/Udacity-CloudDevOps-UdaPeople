@@ -62,11 +62,11 @@ commands:
                   "fields": [
                     {
                       "type": "mrkdwn",
-                      "text": "*Job*: ${CIRCLE_JOB}"
+                      "text": "*Job*: $CIRCLE_JOB"
                     },
                     {
                       "type": "mrkdwn",
-                      "text": "*Stage*: ${CIRCLE_STAGE}"
+                      "text": "*SHA*:\\n$CIRCLE_SHA1"
                     }
                   ]
                 },
