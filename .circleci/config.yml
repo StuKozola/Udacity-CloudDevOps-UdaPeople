@@ -46,36 +46,16 @@ commands:
       - slack/notify:
           channel: C01L195LB4N
           event: fail
-          custom: |
-            {
-              "blocks": [
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": "Your job *$CIRCLE_JOB* has *faild* :octagonal_sign: (<$CIRCLE_BUILD_URL|build #$CIRCLE_BUILD_NUM>)\n\nrepo: $CIRCLE_REPOSITORY_URL\n\nbranch: $CIRCLE_BRANCH\n\ncommitter: $CIRCLE_USERNAME\n\ncommit message: $COMMIT_MESSAGE"
-                  }
-                }
-              ]
-            }
+          template: basic_fail_1
+
+
   slack-pass-notify:
     description: Send pass notification to slack
     steps:
       - slack/notify:
           channel: C01L195LB4N
           event: pass
-          custom: |
-            {
-              "blocks": [
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": "Your job *$CIRCLE_JOB* has *faild* :octagonal_sign: (<$CIRCLE_BUILD_URL|build #$CIRCLE_BUILD_NUM>)\n\nrepo: $CIRCLE_REPOSITORY_URL\n\nbranch: $CIRCLE_BRANCH\n\ncommitter: $CIRCLE_USERNAME\n\ncommit message: $COMMIT_MESSAGE"
-                  }
-                }
-              ]
-            }
+          template: success_tagged_deploy_1
 
 jobs:
   build-frontend:
@@ -176,7 +156,7 @@ jobs:
             npm audit --audit-level=critical
       - slack-pass-notify
       - slack-fail-notify
-      
+
   deploy-infrastructure:
     docker:
       - image: cimg/base:2020.01
