@@ -62,28 +62,11 @@ commands:
                   "fields": [
                     {
                       "type": "mrkdwn",
-                      "text": "*Job*: $CIRCLE_JOB"
+                      "text": "Failure in *$CIRCLE_JOB* of *$CIRCLE_PROJECT_REPONAME ($CIRCLE_BRANCH)"
                     },
                     {
                       "type": "mrkdwn",
-                      "text": "*SHA*:\n$CIRCLE_SHA1"
-                    }
-                  ]
-                },
-                {
-                  "type": "section",
-                  "fields": [
-                    {
-                      "type": "mrkdwn",
-                      "text": "*Project*:\n$CIRCLE_PROJECT_REPONAME"
-                    },
-                    {
-                      "type": "mrkdwn",
-                      "text": "*Branch*:\n$CIRCLE_BRANCH"
-                    },
-                    {
-                      "type": "mrkdwn",
-                      "text": "*Author*:\n$CIRCLE_USERNAME"
+                      "text": "Commit SHA: $CIRCLE_SHA1"
                     }
                   ]
                 },
