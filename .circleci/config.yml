@@ -49,6 +49,7 @@ jobs:
           name: Build front-end
           command: |
             cd frontend
+            sudo npm install webpack-dev-server -g 
             sudo npm install
             sudo npm run build
       - save_cache:
@@ -66,7 +67,7 @@ jobs:
           name: Back-end build
           command: |
              cd backend
-             sudo npm i
+             sudo npm install
              sudo npm run build
       - save_cache:
           paths: [backend/node_modules]
