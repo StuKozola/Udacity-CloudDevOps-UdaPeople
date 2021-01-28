@@ -120,7 +120,6 @@ jobs:
       - save_cache:
           paths: [frontend/node_modules]
           key: frontend-build
-      - slack-pass-notify
       - slack-fail-notify
 
   build-backend:
@@ -139,7 +138,6 @@ jobs:
       - save_cache:
           paths: [backend/node_modules]
           key: backend-build
-      - slack-pass-notify
       - slack-fail-notify
 
   test-frontend:
@@ -155,7 +153,6 @@ jobs:
             cd frontend
             npm install oauth-sign 
             npm run test
-      - slack-pass-notify
       - slack-fail-notify
 
   test-backend:
@@ -170,7 +167,6 @@ jobs:
           command: |
             cd backend
             npm run test
-      - slack-pass-notify
       - slack-fail-notify
             
   scan-frontend:
@@ -185,7 +181,6 @@ jobs:
           command: |
             cd frontend
             npm audit --audit-level=critical
-      - slack-pass-notify
       - slack-fail-notify
 
   scan-backend:
@@ -200,7 +195,6 @@ jobs:
           command: |
             cd backend
             npm audit --audit-level=critical
-      - slack-pass-notify
       - slack-fail-notify
 
   deploy-infrastructure:
