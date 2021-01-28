@@ -56,7 +56,7 @@ commands:
       - get-commit-message
       - slack/notify:
           channel: C01L195LB4N
-          event: pass
+          event: fail
           custom: |
             {
               "blocks": [
@@ -70,16 +70,51 @@ commands:
                 },
                 {
                   "type": "section",
-                  "fields": [
-                    {
+                    "text": {
                       "type": "mrkdwn",
-                      "text": "Failure in *$CIRCLE_JOB* of *$CIRCLE_PROJECT_REPONAME ($CIRCLE_BRANCH)"
-                    },
+                      "text": "Failure in *$CIRCLE_JOB* of *$CIRCLE_PROJECT_REPONAME ($CIRCLE_BRANCH)*\nCommit by $CIRCLE_USERNAME: $COMMIT_MESSAGE"
+                    }
+                },
+                {
+                  "type": "actions",
+                  "elements": [
                     {
-                      "type": "mrkdwn",
-                      "text": "-->$CIRCLE_USERNAME: $COMMIT_MESSAGE"
+                      "type": "button",
+                      "text": {
+                        "type": "plain_text",
+                        "text": "View Job"
+                      },
+                      "url": "${CIRCLE_BUILD_URL}"
                     }
                   ]
+                }
+              ]
+            }
+            
+  slack-pass-notify:
+    description: Send pass notification to slack
+    steps:
+      - get-commit-message
+      - slack/notify:
+          channel: C01L195LB4N
+          event: pass
+          custom: |
+            {
+              "blocks": [
+                {
+                  "type": "header",
+                  "text": {
+                    "type": "plain_text",
+                    "text": ":white_check_mark: Job Passed! :white_check_mark:",
+                    "emoji": true
+                  }
+                },
+                {
+                  "type": "section",
+                    "text": {
+                      "type": "mrkdwn",
+                      "text": "Success in *$CIRCLE_JOB* of *$CIRCLE_PROJECT_REPONAME ($CIRCLE_BRANCH)*\nCommit by $CIRCLE_USERNAME: $COMMIT_MESSAGE"
+                    }
                 },
                 {
                   "type": "actions",
