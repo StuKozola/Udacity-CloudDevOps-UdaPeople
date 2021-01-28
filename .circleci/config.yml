@@ -85,7 +85,7 @@ commands:
                       "type": "mrkdwn",
                       "text": "*Author*:\\n{$CIRCLE_USERNAME}"
                     }
-                  ],
+                  ]
                 },
                 {
                   "type": "actions",
