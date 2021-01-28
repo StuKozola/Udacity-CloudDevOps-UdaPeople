@@ -49,7 +49,7 @@ jobs:
           name: Build front-end
           command: |
             cd frontend
-            sudo npm install webpack-dev-server -g 
+            npm install oauth-sign 
             sudo npm install
             sudo npm run build
       - save_cache:
