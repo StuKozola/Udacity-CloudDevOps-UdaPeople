@@ -162,12 +162,13 @@ jobs:
           name: Back-end build
           command: |
              cd backend
-             sudo npm install
+             # sudo npm install
              sudo npm run build
       - save_cache:
           paths: [backend/node_modules]
           key: backend-build
       - slack-fail-notify
+      - slack-pass-notify
 
   test-frontend:
     docker:
