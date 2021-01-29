@@ -275,19 +275,30 @@ jobs:
       - image: willhallonline/ansible:2.10-ubuntu-18.04
     steps:
       - checkout
-          fingerprints:
-            - "64:f5:b4:02:5b:76:87:e8:4c:fc:f6:0b:df:87:44:9b"
-      # attach workspace
+      -add_ssh_keys:
+        fingerprints: ["64:f5:b4:02:5b:76:87:e8:4c:fc:f6:0b:df:87:44:9b"]
+      - attach_workspace:
+          at: ~/
       - run:
           name: Install dependencies
           command: |
             sudo apt -y update
             sudo apt -y install jq tar gzip git curl
-      - attache_workspace:
-          at: ~/
       - run:
           name: Configure server
           command: |
+            echo ENVIRONMENT=production > "backend/.env"
+            echo TYPEORM_CONNECTION=postgres >> "backend/.env"
+            echo TYPEORM_ENTITIES=./src/modules/domain/**/*.entity.ts >> "backend/.env"
+            echo TYPEORM_MIGRATIONS=./src/migrations/*.ts >> "backend/.env"
+            echo TYPEORM_MIGRATIONS_DIR=./src/migrations >> "backend/.env"
+            echo NODE_ENV=production >> "backend/.env"
+            echo TYPEORM_HOST=$TYPEORM_HOST >> "backend/.env"
+            echo TYPEORM_PORT=$TYPEORM_PORT >> "backend/.env"
+            echo TYPEORM_USERNAME=$TYPEORM_USERNAME >> "backend/.env"
+            echo TYPEORM_PASSWORD=$TYPEORM_PASSWORD >> "backend/.env"
+            echo TYPEORM_DATABASE=$TYPEORM_DATABASE >> "backend/.env"
+
             cd ~/project/.circleci/ansible
             ansible-playbook configure-server.yml --inventory-file=inventory.txt
       # Here's where you will add some code to rollback on failure  
