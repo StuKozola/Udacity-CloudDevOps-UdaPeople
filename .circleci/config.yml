@@ -228,7 +228,7 @@ jobs:
 
   deploy-infrastructure:
     docker:
-      - image: cimg/base:2020.01
+      - image: amazon/aws-cli
     steps:
       - checkout
       - run:
@@ -236,52 +236,66 @@ jobs:
           command: |
             aws cloudformation deploy \
               --template-file .circleci/files/backend.yml \
-              #--tags project=your-tag \
-              # --stack-name "your back-end stack name with workflow id" \
-              # --parameter-overrides ID="your workflow id"  
-              exit 1
+              --tags project=udapeople \
+              --stack-name "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}" \
+              --parameter-overrides ID=${CIRCLE_WORKFLOW_ID:0:7}
       - run:
           name: Ensure front-end infrastructure exist
           command: |
             aws cloudformation deploy \
               --template-file .circleci/files/frontend.yml \
-              #--tags project=your-tag \
-              # --stack-name "your front-end stack name with workflow id" \
-              # --parameter-overrides ID="your workflow id"  
-              exit 1
+              --tags project=udapeople \
+              --stack-name "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}" \
+              --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}"
       - run:
           name: Add back-end ip to ansible inventory
           command: |
-            # Your code here
-            exit 1
+            BACKEND_IP=`aws ec2 describe-instances \
+              --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:7}" \
+              --query "Reservations[*].Instances[*].[PublicDnsName]" \
+              --output text | tr -d '\n'`
+            echo $BACKEND_IP >> .circleci/ansible/inventory.txt
+            
+            cat .circleci/ansible/inventory.txt
+            # put it in the shared memory
+            curl -H "Content-Type: text/plain" \
+              -H "token: 3ffae65a-7ef5-43ba-be64-8cb88a18dd11" \
+              --request PUT \
+              --data "$BACKEND_IP" https://api.memstash.io/values/BACKEND_IP_${CIRCLE_WORKFLOW_ID:0:7}
       - persist_to_workspace:
           root: ~/
           paths:
             - project/.circleci/ansible/inventory.txt
-      # Here's where you will add some code to rollback on failure      
+      # Here's where you will add some code to rollback on failure
+
+      - slack-fail-notify    
 
   configure-infrastructure:
     docker:
-      - image: python:3.7-alpine3.11
+      - image: willhallonline/ansible:2.10-ubuntu-18.04
     steps:
       - checkout
-      # Add ssh keys with fingerprint
+          fingerprints:
+            - "64:f5:b4:02:5b:76:87:e8:4c:fc:f6:0b:df:87:44:9b"
       # attach workspace
       - run:
           name: Install dependencies
           command: |
-            # Your code here
-            exit 1
+            sudo apt -y update
+            sudo apt -y install jq tar gzip git curl
+      - attache_workspace:
+          at: ~/
       - run:
           name: Configure server
           command: |
-            # Your code here
-            exit 1
-      # Here's where you will add some code to rollback on failure      
+            cd ~/project/.circleci/ansible
+            ansible-playbook configure-server.yml --inventory-file=inventory.txt
+      # Here's where you will add some code to rollback on failure  
+      - slack-fail-notify    
 
   run-migrations:
     docker:
-      - image: circleci/node:13.8.0
+      - image: amazon/aws-cli
     steps:
       - checkout
       - run:
