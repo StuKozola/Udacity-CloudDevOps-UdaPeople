@@ -562,7 +562,7 @@ workflows:
           context: UDAPEOPLE
           requires: [deploy-infrastructure]
       - run-migrations:
-        context: UDAPEOPLE
+          context: UDAPEOPLE
           requires: [configure-infrastructure]
       - deploy-frontend:
           context: UDAPEOPLE
