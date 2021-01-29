@@ -186,6 +186,9 @@ jobs:
       - save_cache:
           paths: [backend/node_modules]
           key: backend-build
+      - save_cache:
+          paths: [backend/dist]
+          key: backend-dist
       - slack-fail-notify
 
   test-frontend:
@@ -304,8 +307,8 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            sudo apt -y update
-            sudo apt -y install jq tar gzip git curl
+            apt -y update
+            apt -y install jq tar gzip git curl
       - set-db-environment
       - run:
           name: Configure server
@@ -313,7 +316,7 @@ jobs:
             cd ~/project/.circleci/ansible
             ansible-playbook configure-server.yml --inventory-file=inventory.txt
       # Here's where you will add some code to rollback on failure  
-      - slack-fail-notify    
+      - slack-fail-notify 
 
   run-migrations:
     docker:
@@ -393,23 +396,39 @@ jobs:
               --request PUT --data "$S3_URL" \
             https://api.memstash.io/values/S3_URL_${CIRCLE_WORKFLOW_ID:0:7}
       - slack-fail-notify
-      # Here's where you will add some code to rollback on failure      
+      # Here's where you will add some code to rollback on failure    
                     
   deploy-backend:
     docker:
-      - image: python:3.7-alpine3.11
+      - image: willhallonline/ansible:2.10-ubuntu-18.04
     steps:
       - checkout
-      # Add ssh keys with fingerprint
-      # attach workspace
+      - add_ssh_keys:
+          fingerprints: ["64:f5:b4:02:5b:76:87:e8:4c:fc:f6:0b:df:87:44:9b"]
+      - attach_workspace:
+          at: ~/
       - run:
           name: Install dependencies
           command: |
-            # your code here
+            sudo apt -y update
+            sudo apt -y install jq tar gzip git curl
+            curl -sL https://deb.nodesource.com/setup_12.x | bash -
+            sudo apt -y install nodejs
+      - run:
+          name: Build production backend
+          command: |
+            cd backend
+            npm install
+            npm run build:prod
+            cp package* ./dist
+            cd ./dist
+            tar -czvf ../app.tar.gz ./*
       - run:
           name: Deploy backend
           command: |
-            # your code here
+            cd ~/project/.circleci/ansible
+            ansible-palybook deploy-backend.yml --inventory-file=inventory.txt
+      - slack-notify-fail
       # Here's where you will add some code to rollback on failure  
 
   smoke-test:
