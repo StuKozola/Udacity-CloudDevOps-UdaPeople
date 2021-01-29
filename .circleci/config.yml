@@ -428,7 +428,7 @@ jobs:
           command: |
             cd ~/project/.circleci/ansible
             ansible-palybook deploy-backend.yml --inventory-file=inventory.txt
-      - slack-notify-fail
+      - slack-fail-notify
       # Here's where you will add some code to rollback on failure  
 
   smoke-test:
