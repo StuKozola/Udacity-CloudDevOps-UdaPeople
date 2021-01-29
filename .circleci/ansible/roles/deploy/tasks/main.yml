@@ -1,0 +1,15 @@
+- name: Deploy backend app
+  become_user: ubuntu
+  unarchive:
+    src: ../../backend/app.tar.gz
+    dest: /home/ubuntu/
+    owner: ubuntu
+    group: ubuntu
+    mode: 0755
+
+- name: Start pm2 (run backend app)
+  become_user: ubuntu
+  shell: |
+    cd /home/ubuntu/
+    npm install
+    pm2 start main.js --name backend --udate-env

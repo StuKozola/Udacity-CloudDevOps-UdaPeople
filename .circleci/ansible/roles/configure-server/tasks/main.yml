@@ -1,3 +1,4 @@
+---
 - name "upgrade packages"
   become: true
   apt:
@@ -12,7 +13,7 @@
 - name: "install pm2"
   become: true
   npm:
-    name: pm2
+    name: "pm2"
     global: yes
     production: yes
     state: present
