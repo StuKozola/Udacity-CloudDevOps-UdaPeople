@@ -315,6 +315,12 @@ jobs:
           command: |
             cd ~/project/.circleci/ansible
             ansible-playbook configure-server.yml --inventory-file=inventory.txt
+      - run:
+          name: Install AWS CLI for rollback
+          when: on_fail
+          command: |
+            pip3 install --upgrade pip
+            pip3 install awscli
       - slack-fail-notify
       - destroy-environment  
 
@@ -478,17 +484,31 @@ jobs:
 
   cloudfront-update:
     docker:
-      - image: python:3.7-alpine3.11
+      - image: amazon/aws-cli
     steps:
       - checkout
       - run:
           name: Install dependencies
           command: |
-            # your code here
+            yum -y install jq tar gzip git curl
+      - run:
+          name: Save old workflow id
+          command: |
+            export OldWorkflowID=$(aws cloudformation \
+                          list-exports --query "Exports[?Name==\`WorkflowID\`].Value" \
+                          --no-paginate --output text)
+            echo "OldWorkflowID: ${OldWorkflowID}"
+            curl -H "Content-Type: text/plain" -H "token: << pipeline.parameters.memstash-token >>" \
+                        --request PUT --data "${OldWorkflowID}" \
+                        https://api.memstash.io/values/OldWorkflowID_${CIRCLE_WORKFLOW_ID:0:7}
       - run:
           name: Update cloudfront distribution
           command: |
-            # your code here
+            aws cloudformation deploy \
+            --template-file .circleci/files/cloudfront.yml \
+            --tags project=udapeople \
+            --stack-name "udapeople-cloudfront" \
+            --parameter-overrides WorkflowID="${CIRCLE_WORKFLOW_ID:0:7}"
       - slack-fail-notify
       - revert-migrations
       - destroy-environment  
@@ -542,14 +562,20 @@ workflows:
           context: UDAPEOPLE
           requires: [deploy-infrastructure]
       - run-migrations:
+        context: UDAPEOPLE
           requires: [configure-infrastructure]
       - deploy-frontend:
+          context: UDAPEOPLE
           requires: [run-migrations]
       - deploy-backend:
+          context: UDAPEOPLE
           requires: [run-migrations]
       - smoke-test:
+          context: UDAPEOPLE
           requires: [deploy-backend, deploy-frontend]
       - cloudfront-update:
+          context: UDAPEOPLE
           requires: [smoke-test]
       - cleanup:
+          context: UDAPEOPLE
           requires: [cloudfront-update]

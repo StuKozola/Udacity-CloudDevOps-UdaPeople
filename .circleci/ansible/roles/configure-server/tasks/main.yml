@@ -6,7 +6,7 @@
 - name: "install dependencies"
   become: true
   apt:
-    name: ["node.js", "npm"]
+    name: ["nodejs", "npm"]
     udpate_cache: yes
 
 - name: "install pm2"
