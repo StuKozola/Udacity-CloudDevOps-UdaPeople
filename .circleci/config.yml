@@ -16,7 +16,7 @@ commands:
       - run:
           name: Install dependcies
           command: |
-            sudo apt -y install jq tar gzip git curl
+            apt -y install jq tar gzip git curl
       - aws-cli/setup
       - run:
           name: Destroy environments
