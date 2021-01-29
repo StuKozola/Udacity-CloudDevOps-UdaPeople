@@ -150,7 +150,6 @@ jobs:
           paths: [frontend/node_modules]
           key: frontend-build
       - slack-fail-notify
-      - slack-pass-notify
 
   build-backend:
     docker:
@@ -169,6 +168,7 @@ jobs:
           paths: [backend/node_modules]
           key: backend-build
       - slack-fail-notify
+      - slack-pass-notify
 
   test-frontend:
     docker:
