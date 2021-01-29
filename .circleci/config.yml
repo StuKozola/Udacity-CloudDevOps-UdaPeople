@@ -343,8 +343,8 @@ jobs:
           name: Run migrations
           command: |
             cd backend
-            sudo npm install
-            sudo npm run migrations > /tmp/migrations.log
+            npm install
+            npm run migrations > /tmp/migrations.log
             cat /tmp/migrations.log
             MIGRATION_STATUS=$(cat /tmp/migrations.log | grep -c "has been executed successfully")
             if [ $MIGRATION_STATUS > 0 ]; 
