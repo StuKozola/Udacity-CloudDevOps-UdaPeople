@@ -1,0 +1,9 @@
+---
+
+- name: "configure-prometheus"
+  hosts: web
+  user: ubuntu
+  gather_facts: false
+
+  roles:
+    - configure-prometheus-node-exporter

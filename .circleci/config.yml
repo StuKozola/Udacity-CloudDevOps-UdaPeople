@@ -14,11 +14,6 @@ commands:
     description: Destroy back-end and front-end cloudformation stacks given a workflow ID. 
     steps:
       - run:
-          name: Install dependcies
-          command: |
-            apt -y install jq tar gzip git curl
-      - aws-cli/setup
-      - run:
           name: Destroy environments
           when: on_fail
           command: |
@@ -295,7 +290,6 @@ jobs:
           root: ~/
           paths:
             - project/.circleci/ansible/inventory.txt
-      # Here's where you will add some code to rollback on failure
       - slack-fail-notify
       - destroy-environment   
 
@@ -321,7 +315,17 @@ jobs:
           command: |
             cd ~/project/.circleci/ansible
             ansible-playbook configure-server.yml --inventory-file=inventory.txt
+      - run:
+          name: Install prometheus node exporter
+          command: |
+            cd ~/project/.circleci/ansible
+            ansible-playbook configure-prometheus.yml --inventory-file=inventory.txt
       - slack-fail-notify
+      - run:
+          name: Install AWS CLI for rollback
+          when: on_fail
+          command: |
+            pip3 install --upgrade pip && pip3 install awscli
       - destroy-environment  
 
   run-migrations:
@@ -436,6 +440,11 @@ jobs:
           command: |
             cd ~/project/.circleci/ansible
             ansible-palybook deploy-backend.yml --inventory-file=inventory.txt
+      - run:
+          name: Install AWS CLI for rollback
+          when: on_fail
+          command: |
+            pip3 install --upgrade pip && pip3 install awscli
       - slack-fail-notify
       - revert-migrations
       - destroy-environment   
@@ -478,6 +487,11 @@ jobs:
             else
               return 0
             fi
+      - run:
+          name: Install AWS CLI for rollback
+          when: on_fail
+          command: |
+            pip3 install --upgrade pip && pip3 install awscli
       - slack-fail-notify
       - revert-migrations
       - destroy-environment  
