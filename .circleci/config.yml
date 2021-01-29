@@ -437,11 +437,13 @@ workflows:
           context: UDAPEOPLE
           requires: [build-frontend]
       - deploy-infrastructure:
+        context: UDAPEOPLE
           requires: [test-frontend, test-backend, scan-frontend, scan-backend]
           filters:
             branches:
               only: [test-feature-branch]
       - configure-infrastructure:
+          context: UDAPEOPLE
           requires: [deploy-infrastructure]
       - run-migrations:
           requires: [configure-infrastructure]
