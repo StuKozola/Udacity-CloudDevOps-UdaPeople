@@ -10,34 +10,31 @@ parameters:
 
 commands:
   destroy-environment:
-    description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
-    #parameters:
-      # Add parameter here   
+    description: Destroy back-end and front-end cloudformation stacks given a workflow ID. 
     steps:
       - run:
           name: Destroy environments
           when: on_fail
           command: |
-            # Your code here
-            exit 1
+            aws s3 rm --recursive s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7}
+            aws cloudformation delete-stack --stack-name backend-${CIRCLE_WORKFLOW_ID:0:7}
+            aws cloudformation delete-stack --stack-name frontend-${CIRCLE_WORKFLOW_ID:0:7}
+            exit 0
 
   revert-migrations:
-    description: Revert the last migration if successfully run in the current workflow.
-    #parameters:
-      # Add parameter here     
+    description: Revert the last migration if successfully run in the current workflow.   
     steps:
       - run:
           name: Revert migrations
-          # Add when this will run
+          when: on_fail
           command: |
-            # Curl command here to see if there was a successful migration associated with the workflow id, store result in SUCCESS variable
-            SUCCESS = 1
+            export SUCCESS=$(curl -H "token: << pipeline.parameters.memstash-token >>" \
+              --request GET https://api.memstash.io/values/migration_${CIRCLE_WORKFLOW_ID})
             if(( $SUCCESS==1 )); 
             then
-            #  cd ~/project/backend
-            #  npm install
-            #  Add revert code here. You can find this in the Getting Started section.
-              exit 1
+              cd ~/project/backend
+              npm install
+              npm run migrations:revert
             fi
 
   get-commit-message:
@@ -293,7 +290,8 @@ jobs:
           paths:
             - project/.circleci/ansible/inventory.txt
       # Here's where you will add some code to rollback on failure
-      - slack-fail-notify    
+      - slack-fail-notify
+      - destroy-environment   
 
   configure-infrastructure:
     docker:
@@ -312,11 +310,13 @@ jobs:
       - set-db-environment
       - run:
           name: Configure server
+          environment: 
+            ANSIBLE_HOST_KEY_CHECKING: False
           command: |
             cd ~/project/.circleci/ansible
             ansible-playbook configure-server.yml --inventory-file=inventory.txt
-      # Here's where you will add some code to rollback on failure  
-      - slack-fail-notify 
+      - slack-fail-notify
+      - destroy-environment  
 
   run-migrations:
     docker:
@@ -348,7 +348,8 @@ jobs:
                -H "token: << pipeline.parameters.memstash-token >>" \
                --request PUT --data "1" https://api.memstash.io/values/migration_${CIRCLE_WORKFLOW_ID:0:7}
       - slack-fail-notify
-     # Here's where you will add some code to rollback on failure      
+      - revert-migrations
+      - destroy-environment      
 
   deploy-frontend:
     docker:
@@ -396,7 +397,8 @@ jobs:
               --request PUT --data "$S3_URL" \
             https://api.memstash.io/values/S3_URL_${CIRCLE_WORKFLOW_ID:0:7}
       - slack-fail-notify
-      # Here's where you will add some code to rollback on failure    
+      - revert-migrations
+      - destroy-environment    
                     
   deploy-backend:
     docker:
@@ -429,7 +431,8 @@ jobs:
             cd ~/project/.circleci/ansible
             ansible-palybook deploy-backend.yml --inventory-file=inventory.txt
       - slack-fail-notify
-      # Here's where you will add some code to rollback on failure  
+      - revert-migrations
+      - destroy-environment   
 
   smoke-test:
     docker:
@@ -450,7 +453,8 @@ jobs:
           name: Backend smoke test.
           command: |
             echo $BACKEND_URL
-            if curl -s http://${BACKEND_URL}:3030/api/status then
+            if curl -s http://${BACKEND_URL}:3030/api/status 
+            then
               return 1
             else
               return 0
@@ -462,13 +466,15 @@ jobs:
               --request GET https://api.memstash.io/values/S3_URL_${CIRCLE_WORKFLOW_ID:0:7}`
             echo $S3_URL
 
-            if curl -s ${URL} | grep "Welcome" then
+            if curl -s ${URL} | grep "Welcome" 
+            then
               return 1
             else
               return 0
             fi
       - slack-fail-notify
-      # Here's where you will add some code to rollback on failure  
+      - revert-migrations
+      - destroy-environment  
 
   cloudfront-update:
     docker:
@@ -483,7 +489,9 @@ jobs:
           name: Update cloudfront distribution
           command: |
             # your code here
-      # Here's where you will add some code to rollback on failure  
+      - slack-fail-notify
+      - revert-migrations
+      - destroy-environment  
 
   cleanup:
     docker:
