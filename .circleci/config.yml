@@ -2,11 +2,12 @@ version: 2.1
 
 orbs:
   slack: circleci/slack@4.1.1
+  aws-cli: cricleci/aws-cli@1.3.2
 
 parameters:
-  workflow-id:
+  memstash-token:
     type: string
-    default: "${CIRCLE_WORKFLOW_ID:0:7}"
+    default: "3ffae65a-7ef5-43ba-be64-8cb88a18dd11"
 
 commands:
   destroy-environment:
@@ -49,6 +50,25 @@ commands:
           command: |
             echo "export COMMIT_MESSAGE=\"$(git log --format=%B -n 1 $CIRCLE_SHA1)\"" >> $BASH_ENV
             source $BASH_ENV
+  
+  set-db-environment:
+    description: Set backend db environment variables
+    steps:
+      - run:
+          name: Setting database environment variables
+          when: always
+          command: |
+            echo ENVIRONMENT=production > "backend/.env"
+            echo TYPEORM_CONNECTION=postgres >> "backend/.env"
+            echo TYPEORM_ENTITIES=./src/modules/domain/**/*.entity.ts >> "backend/.env"
+            echo TYPEORM_MIGRATIONS=./src/migrations/*.ts >> "backend/.env"
+            echo TYPEORM_MIGRATIONS_DIR=./src/migrations >> "backend/.env"
+            echo NODE_ENV=production >> "backend/.env"
+            echo TYPEORM_HOST=$TYPEORM_HOST >> "backend/.env"
+            echo TYPEORM_PORT=$TYPEORM_PORT >> "backend/.env"
+            echo TYPEORM_USERNAME=$TYPEORM_USERNAME >> "backend/.env"
+            echo TYPEORM_PASSWORD=$TYPEORM_PASSWORD >> "backend/.env"
+            echo TYPEORM_DATABASE=$TYPEORM_DATABASE >> "backend/.env"
 
   slack-fail-notify:
     description: Send failure notification to slack
@@ -263,7 +283,7 @@ jobs:
             cat .circleci/ansible/inventory.txt
             # put it in the shared memory
             curl -H "Content-Type: text/plain" \
-              -H "token: 3ffae65a-7ef5-43ba-be64-8cb88a18dd11" \
+              -H "token: << pipeline.parameters.memstash-token >>" \
               --request PUT \
               --data "$BACKEND_IP" https://api.memstash.io/values/BACKEND_IP_${CIRCLE_WORKFLOW_ID:0:7}
       - persist_to_workspace:
@@ -287,21 +307,10 @@ jobs:
           command: |
             sudo apt -y update
             sudo apt -y install jq tar gzip git curl
+      - set-db-environment
       - run:
           name: Configure server
           command: |
-            echo ENVIRONMENT=production > "backend/.env"
-            echo TYPEORM_CONNECTION=postgres >> "backend/.env"
-            echo TYPEORM_ENTITIES=./src/modules/domain/**/*.entity.ts >> "backend/.env"
-            echo TYPEORM_MIGRATIONS=./src/migrations/*.ts >> "backend/.env"
-            echo TYPEORM_MIGRATIONS_DIR=./src/migrations >> "backend/.env"
-            echo NODE_ENV=production >> "backend/.env"
-            echo TYPEORM_HOST=$TYPEORM_HOST >> "backend/.env"
-            echo TYPEORM_PORT=$TYPEORM_PORT >> "backend/.env"
-            echo TYPEORM_USERNAME=$TYPEORM_USERNAME >> "backend/.env"
-            echo TYPEORM_PASSWORD=$TYPEORM_PASSWORD >> "backend/.env"
-            echo TYPEORM_DATABASE=$TYPEORM_DATABASE >> "backend/.env"
-
             cd ~/project/.circleci/ansible
             ansible-playbook configure-server.yml --inventory-file=inventory.txt
       # Here's where you will add some code to rollback on failure  
@@ -309,40 +318,78 @@ jobs:
 
   run-migrations:
     docker:
-      - image: amazon/aws-cli
+      - image: circleci/node:13.8.0
     steps:
       - checkout
+      - aws-cli/setup
+      - set-db-environment
       - run:
           name: Run migrations
           command: |
-            # Your code here
-            exit 1
+            cd backend
+            sudo npm install
+            sudo npm run migrations > /tmp/migrations.log
+            cat /tmp/migrations.log
+            MIGRATION_STATUS=$(cat /tmp/migrations.log | grep -c "has been executed successfully")
+            if [ $MIGRATION_STATUS > 0 ]; 
+              then exit 0; 
+              else exit 1;
+            fi
       - run:
           name: Send migration results to memstash
           command: |
-            # Your code here
-            exit 1
+            curl -H "Content-Type: text/plain" \
+               -H "token: << pipeline.parameters.memstash-token >>" \
+               --request PUT --data "1" https://api.memstash.io/values/migration_${CIRCLE_WORKFLOW_ID:0:7}
+      - slack-fail-notify
      # Here's where you will add some code to rollback on failure      
 
   deploy-frontend:
     docker:
-      - image: circleci/node:13.8.0
+      - image: amazon/aws-cli
     steps:
       - checkout
       - run:
           name: Install dependencies
           command: |
-            # your code here
+            curl -sL https://rpm.nodesource.com/setup_12.x | bash -
+            yum -y install nodejs npm tar gzip jq git
       - run:
           name: Get backend url
           command: |
-            # your code here
+            BACKEND_IP=`curl -H \
+              "token: << pipeline.parameters.memstash-token >>" \
+              --request GET https://api.memstash.io/values/BACKEND_IP_${CIRCLE_WORKFLOW_ID:0:7}`
             export API_URL="http://${BACKEND_IP}:3030"
             echo "${API_URL}"
       - run:
+          name: Build frontend
+          command: |            
+            cd frontend
+            npm install
+
+            BACKEND_IP=`curl -H "token: << pipeline.parameters.memstash-token >>" \
+              --request GET https://api.memstash.io/values/BACKEND_IP_${CIRCLE_WORKFLOW_ID:0:7}`
+            export API_URL="http://${BACKEND_IP}:3030"
+            export NODE_ENV=production
+
+            npm run build:prod
+      - run:
           name: Deploy frontend objects
           command: |
-            # your code here
+            cd frontend
+            cp .env ./dist/
+            aws s3 cp ./dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
+      - run:
+          name: Save S3 bucket url
+          command: |
+            LOCATION=`aws s3api get-bucket-location --bucket udapeople-${CIRCLE_WORKFLOW_ID:0:7} --output text | tr -d '\n'`
+            S3_URL="udapeople-${CIRCLE_WORKFLOW_ID:0:7}.s3-${LOCATION}.amazonaws.com/index.html"
+            echo $S3_URL
+            curl -H "Content-Type: text/plain" -H "token: << pipeline.parameters.memstash-token >>" \
+              --request PUT --data "$S3_URL" \
+            https://api.memstash.io/values/S3_URL_${CIRCLE_WORKFLOW_ID:0:7}
+      - slack-fail-notify
       # Here's where you will add some code to rollback on failure      
                     
   deploy-backend:
