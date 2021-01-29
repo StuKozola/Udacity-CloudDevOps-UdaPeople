@@ -2,6 +2,7 @@ version: 2.1
 
 orbs:
   slack: circleci/slack@4.1.1
+  aws-cli: circleci/aws-cli@1.3.0
 
 parameters:
   memstash-token:
@@ -12,6 +13,7 @@ commands:
   destroy-environment:
     description: Destroy back-end and front-end cloudformation stacks given a workflow ID. 
     steps:
+      - aws-cli/setup
       - run:
           name: Destroy environments
           when: on_fail
@@ -315,12 +317,6 @@ jobs:
           command: |
             cd ~/project/.circleci/ansible
             ansible-playbook configure-server.yml --inventory-file=inventory.txt
-      - run:
-          name: Install AWS CLI for rollback
-          when: on_fail
-          command: |
-            pip3 install --upgrade pip
-            pip3 install awscli
       - slack-fail-notify
       - destroy-environment  
 
@@ -505,10 +501,10 @@ jobs:
           name: Update cloudfront distribution
           command: |
             aws cloudformation deploy \
-            --template-file .circleci/files/cloudfront.yml \
-            --tags project=udapeople \
-            --stack-name "udapeople-cloudfront" \
-            --parameter-overrides WorkflowID="${CIRCLE_WORKFLOW_ID:0:7}"
+              --template-file .circleci/files/cloudfront.yml \
+              --tags project=udapeople \
+              --stack-name "udapeople-cloudfront" \
+              --parameter-overrides WorkflowID="${CIRCLE_WORKFLOW_ID:0:7}"
       - slack-fail-notify
       - revert-migrations
       - destroy-environment  
@@ -518,18 +514,26 @@ jobs:
       - image: cimg/base:2020.01
     steps:
       - checkout
+      - aws-cli/setup
       - run:
           name: Get old stack workflow id
           command: |
-            # your code here
-            export OldWorkflowID="the id here"
-            export STACKS=[] #put the list of stacks here
+            export OldWorkflowID=$(curl -H "token: << pipeline.parameters.memstash-token >>" \
+              --request GET https://api.memstash.io/values/old_workflow_id_${CIRCLE_WORKFLOW_ID})
+            echo "OldWorkflowID: ${OldWorkflowID}"
+
+            export STACKS=export STACKS=$(aws cloudformation list-stacks \
+              --query "StackSummaries[*].StackName" \
+              --stack-status-filter CREATE_COMPLETE --no-paginate --output text | tr -d '\n')
+            echo "STACKS:\n ${STACKS}"
       - run:
           name: Remove old stacks and files
           command: |
             if [[ "${STACKS[@]}" =~ "${OldWorkflowID}" ]]
             then
-              # your code here
+              aws s3 rm s3://udapeople-${OldWorkflowID} --recursive
+              aws cloudformation delete-stack --stack-name backend-${OldWorkflowID}
+              aws cloudformation delete-stack --stack-name frontend-${OldWorkflowID}
             fi
             
 
