@@ -442,7 +442,7 @@ jobs:
           name: Deploy backend
           command: |
             cd ~/project/.circleci/ansible
-            ansible-palybook deploy-backend.yml --inventory-file=inventory.txt
+            ansible-playbook deploy-backend.yml --inventory-file=inventory.txt
       - run:
           name: Install AWS CLI for rollback
           when: on_fail
