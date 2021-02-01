@@ -434,7 +434,7 @@ jobs:
           command: |
             cd backend
             npm install
-            npm run build:prod
+            npm run build
             cp package* ./dist
             cd ./dist
             tar -czvf ../app.tar.gz ./*
