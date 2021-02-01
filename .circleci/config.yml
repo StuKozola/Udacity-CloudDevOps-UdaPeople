@@ -54,6 +54,7 @@ commands:
           name: Setting database environment variables
           when: always
           command: |
+            echo ANSIBLE_HOST_KEY_CHECKING=False > "backend/.env"
             echo ENVIRONMENT=production > "backend/.env"
             echo TYPEORM_CONNECTION=postgres >> "backend/.env"
             echo TYPEORM_ENTITIES=./src/modules/domain/**/*.entity.ts >> "backend/.env"
@@ -418,6 +419,7 @@ jobs:
       - image: willhallonline/ansible:2.10-ubuntu-18.04
     steps:
       - checkout
+      - set-db-environment
       - add_ssh_keys:
           fingerprints: ["64:f5:b4:02:5b:76:87:e8:4c:fc:f6:0b:df:87:44:9b"]
       - attach_workspace:
