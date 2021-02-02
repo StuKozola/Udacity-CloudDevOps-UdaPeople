@@ -14,6 +14,7 @@
     npm install -g webpack-dev-server
     npm install
 
--name: Build and run PM2 server
+- name: Build and run PM2 server
+  shell: |
     npm run build
     pm2 start npm --name backend -- start
