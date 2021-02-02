@@ -462,8 +462,7 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            apk add --update curl
-            apt -y install jq tar gzip git curl
+            apk add --update tar gzip ansible nodejs npm curl jq
       - attach_workspace:
           at: ~/
       - run:
