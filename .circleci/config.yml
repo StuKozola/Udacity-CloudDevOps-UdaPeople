@@ -432,15 +432,13 @@ jobs:
             apt -y install jq tar gzip git curl
             curl -sL https://deb.nodesource.com/setup_12.x | bash -
             apt -y install nodejs
+      - restore_cache:
+          keys: ["backend-dist"]
       - run:
-          name: Build production backend
+          name: Package backend
           command: |
-            cd backend
-            npm install
-            npm run build
-            cp package* ./dist
-            cd ./dist
-            tar -czvf ../app.tar.gz ./*
+            cd /home
+            tar -czf backend.tar.gz -P /home/circleci/project/backend/dist
       - run:
           name: Deploy backend
           command: |
