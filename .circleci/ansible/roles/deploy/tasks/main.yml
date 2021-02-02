@@ -7,9 +7,16 @@
     group: ubuntu
     mode: 0755
 
+- name: Install dependencies
+  shell: |
+    cd /home/ubuntu/backend
+    ls -la
+    printenv
+    npm install
+    npm run prestart:prod
+
 - name: Start pm2 (run backend app)
   become_user: ubuntu
   shell: |
-    cd /home/ubuntu/
-    npm install
+    cd /home/ubuntu/backend
     pm2 start main.js --name backend --udate-env
