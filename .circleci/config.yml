@@ -445,6 +445,7 @@ jobs:
           name: Deploy backend
           command: |
             cd ~/project/.circleci/ansible
+            export ANSIBLE_HOST_KEY_CHECKING=False
             ansible-playbook deploy-backend.yml --inventory-file=inventory.txt
       - run:
           name: Install AWS CLI for rollback
