@@ -490,7 +490,7 @@ jobs:
             then
               return 1
             else
-              return 0
+              return 1 # test failed smoke test
             fi
       - run:
           name: Install AWS CLI for rollback
