@@ -287,6 +287,7 @@ jobs:
               -H "token: << pipeline.parameters.memstash-token >>" \
               --request PUT \
               --data "$BACKEND_URL" https://api.memstash.io/values/BACKEND_URL_${CIRCLE_WORKFLOW_ID:0:7}
+            echo $BACKEND_URL
       - persist_to_workspace:
           root: ~/
           paths:
