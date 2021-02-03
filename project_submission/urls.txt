@@ -3,3 +3,10 @@
 [URL03] http://dg31bf7ptmbml.cloudfront.net
 [URL04] http://ec2-34-222-72-39.us-west-2.compute.amazonaws.com:3030/api/status
 [URL05] http://ec2-35-160-142-195.us-west-2.compute.amazonaws.com:9090/targets
+
+CPU
+100 - (avg by (instance) (rate(node_cpu_seconds_total{job="node",mode="idle"}[1m])) * 100)
+DISK I/O
+100 - ((node_filesystem_avail_bytes{mountpoint="/",fstype!="rootfs"} * 100) /            node_filesystem_size_bytes{mountpoint="/",fstype!="rootfs"})
+Memory
+100 * (1 - ((avg_over_time(node_memory_MemFree_bytes[1m]) + avg_over_time(node_memory_Cached_bytes[1m]) + avg_over_time(node_memory_Buffers_bytes[1m])) / avg_over_time(node_memory_MemTotal_bytes[1m])))

@@ -542,7 +542,7 @@ jobs:
       - checkout
       - aws-cli/setup
       - run:
-          name: Get old stack workflow id
+          name: Get old stack workflow id and remove old stacks/files
           command: |
             export OldWorkflowID=$(curl -H "token: << pipeline.parameters.memstash-token >>" \
               --request GET https://api.memstash.io/values/old_workflow_id_${CIRCLE_WORKFLOW_ID:0:7})
@@ -552,9 +552,7 @@ jobs:
               --query "StackSummaries[*].StackName" \
               --stack-status-filter CREATE_COMPLETE --no-paginate --output text | tr -d '\n')
             echo "STACKS:\n ${STACKS}"
-      - run:
-          name: Remove old stacks and files
-          command: |
+
             if [[ "${STACKS[@]}" =~ "${OldWorkflowID}" ]]
             then
               echo "Deleting ${OldWorkflowID}"
