@@ -490,7 +490,7 @@ jobs:
             then
               return 1
             else
-              return 1 # test failed smoke test
+              return 0
             fi
       - run:
           name: Install AWS CLI for rollback
@@ -519,7 +519,7 @@ jobs:
             echo "OldWorkflowID: ${OldWorkflowID}"
             curl -H "Content-Type: text/plain" -H "token: << pipeline.parameters.memstash-token >>" \
                         --request PUT --data "${OldWorkflowID}" \
-                        https://api.memstash.io/values/OldWorkflowID_${CIRCLE_WORKFLOW_ID:0:7}
+                        https://api.memstash.io/old_workflow_id_${CIRCLE_WORKFLOW_ID:0:7}
       - run:
           name: Update cloudfront distribution
           command: |
