@@ -520,6 +520,8 @@ jobs:
             curl -H "Content-Type: text/plain" -H "token: << pipeline.parameters.memstash-token >>" \
                         --request PUT --data "${OldWorkflowID}" \
                         https://api.memstash.io/values/old_workflow_id_${CIRCLE_WORKFLOW_ID:0:7}
+            echo `curl -H "token: << pipeline.parameters.memstash-token >>" \
+              --request GET https://api.memstash.io/values/old_workflow_id_${CIRCLE_WORKFLOW_ID}`
       - run:
           name: Update cloudfront distribution
           command: |
@@ -559,7 +561,8 @@ jobs:
               aws cloudformation delete-stack --stack-name frontend-${OldWorkflowID}
             fi
       - slack-fail-notify
-            
+      - revert-migrations
+      - destroy-environment 
 
 workflows:
   default:
