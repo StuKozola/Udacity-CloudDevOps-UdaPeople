@@ -346,6 +346,7 @@ jobs:
           command: |
             cd backend
             npm install
+            echo "No migrations here" > /tmp/migrations.log
             npm run migrations > /tmp/migrations.log
             cat /tmp/migrations.log
 
@@ -547,7 +548,7 @@ jobs:
               --request GET https://api.memstash.io/values/old_workflow_id_${CIRCLE_WORKFLOW_ID:0:7})
             echo "OldWorkflowID: ${OldWorkflowID}"
 
-            export STACKS=export STACKS=$(aws cloudformation list-stacks \
+            export STACKS=$(aws cloudformation list-stacks \
               --query "StackSummaries[*].StackName" \
               --stack-status-filter CREATE_COMPLETE --no-paginate --output text | tr -d '\n')
             echo "STACKS:\n ${STACKS}"
@@ -556,7 +557,7 @@ jobs:
           command: |
             if [[ "${STACKS[@]}" =~ "${OldWorkflowID}" ]]
             then
-              echo "Deleting${OldWorkflowID}"
+              echo "Deleting ${OldWorkflowID}"
               aws s3 rm s3://udapeople-${OldWorkflowID} --recursive
               aws cloudformation delete-stack --stack-name backend-${OldWorkflowID}
               aws cloudformation delete-stack --stack-name frontend-${OldWorkflowID}
