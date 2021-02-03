@@ -348,17 +348,16 @@ jobs:
             npm install
             npm run migrations > /tmp/migrations.log
             cat /tmp/migrations.log
+
+            RESULT=0
             MIGRATION_STATUS=$(cat /tmp/migrations.log | grep -c "has been executed successfully")
             if [ $MIGRATION_STATUS > 0 ]; 
-              then exit 0; 
-              else exit 1;
+              then RESULT=1; 
             fi
-      - run:
-          name: Send migration results to memstash
-          command: |
+
             curl -H "Content-Type: text/plain" \
                -H "token: << pipeline.parameters.memstash-token >>" \
-               --request PUT --data "1" https://api.memstash.io/values/migration_${CIRCLE_WORKFLOW_ID:0:7}
+               --request PUT --data "${RESULT}" https://api.memstash.io/values/migration_${CIRCLE_WORKFLOW_ID:0:7}
       - slack-fail-notify
       - revert-migrations
       - destroy-environment      
@@ -557,6 +556,7 @@ jobs:
           command: |
             if [[ "${STACKS[@]}" =~ "${OldWorkflowID}" ]]
             then
+              echo "Deleting ${OldWorkflowID}"
               aws s3 rm s3://udapeople-${OldWorkflowID} --recursive
               aws cloudformation delete-stack --stack-name backend-${OldWorkflowID}
               aws cloudformation delete-stack --stack-name frontend-${OldWorkflowID}
