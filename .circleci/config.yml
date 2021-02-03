@@ -471,13 +471,14 @@ jobs:
           command: |
             cat .circleci/ansible/inventory.txt
             export BACKEND_URL=$(sed -n 2p .circleci/ansible/inventory.txt)
-            echo $BACKEND_URL
+           
+            echo `curl -s http://${BACKEND_URL}:3030/api/status`
             
-            if curl -s http://${BACKEND_URL}:3030/api/status 
+            if curl -s http://${BACKEND_URL}:3030/api/status
             then
-              return 0
-            else
               return 1
+            else
+              return 0
             fi
       - run:
           name: Frontend smoke test.
@@ -488,9 +489,9 @@ jobs:
 
             if curl -s ${URL} | grep "Welcome" 
             then
-              return 0
-            else
               return 1
+            else
+              return 0
             fi
       - run:
           name: Install AWS CLI for rollback
