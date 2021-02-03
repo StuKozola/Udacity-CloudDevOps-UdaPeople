@@ -521,7 +521,7 @@ jobs:
                         --request PUT --data "${OldWorkflowID}" \
                         https://api.memstash.io/values/old_workflow_id_${CIRCLE_WORKFLOW_ID:0:7}
             echo `curl -H "token: << pipeline.parameters.memstash-token >>" \
-              --request GET https://api.memstash.io/values/old_workflow_id_${CIRCLE_WORKFLOW_ID}`
+              --request GET https://api.memstash.io/values/old_workflow_id_${CIRCLE_WORKFLOW_ID:0:7}`
       - run:
           name: Update cloudfront distribution
           command: |
@@ -544,7 +544,7 @@ jobs:
           name: Get old stack workflow id
           command: |
             export OldWorkflowID=$(curl -H "token: << pipeline.parameters.memstash-token >>" \
-              --request GET https://api.memstash.io/values/old_workflow_id_${CIRCLE_WORKFLOW_ID})
+              --request GET https://api.memstash.io/values/old_workflow_id_${CIRCLE_WORKFLOW_ID:0:7})
             echo "OldWorkflowID: ${OldWorkflowID}"
 
             export STACKS=export STACKS=$(aws cloudformation list-stacks \
@@ -561,8 +561,6 @@ jobs:
               aws cloudformation delete-stack --stack-name frontend-${OldWorkflowID}
             fi
       - slack-fail-notify
-      - revert-migrations
-      - destroy-environment 
 
 workflows:
   default:
