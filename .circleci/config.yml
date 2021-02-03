@@ -469,6 +469,7 @@ jobs:
       - run:
           name: Get backend url
           command: |
+            cat .circleci/ansible/inventory.txt
             export BACKEND_URL=$(sed -n 2p .circleci/ansible/inventory.txt)
       - run:
           name: Backend smoke test.
@@ -489,9 +490,9 @@ jobs:
 
             if curl -s ${URL} | grep "Welcome" 
             then
-              return 1
-            else
               return 0
+            else
+              return 1
             fi
       - run:
           name: Install AWS CLI for rollback
