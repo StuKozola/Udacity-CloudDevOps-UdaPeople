@@ -12,12 +12,13 @@
     mode: 0755
 
 - name: Install dependencies and build
+  become: true
   shell: |
     cd ~/backend
-    npm install -g npm@latest
-    npm install -g webpack-dev-server
-    npm install
-    npm run build
+    sudo npm install -g npm@latest
+    sudo npm install -g webpack-dev-server
+    sudo npm install
+    sudo npm run build
 
 - name: Run PM2 server
   shell: |
