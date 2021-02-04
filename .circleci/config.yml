@@ -386,7 +386,7 @@ jobs:
             BACKEND_URL=`curl -H \
               "token: << pipeline.parameters.memstash-token >>" \
               --request GET https://api.memstash.io/values/BACKEND_URL_${CIRCLE_WORKFLOW_ID:0:7}`
-            export API_URL="http://${BACKEND_URL}:3030"
+            export API_URL="https://${BACKEND_URL}:3030"
             echo "${API_URL}"
       - run:
           name: Build frontend
@@ -396,7 +396,7 @@ jobs:
 
             BACKEND_URL=`curl -H "token: << pipeline.parameters.memstash-token >>" \
               --request GET https://api.memstash.io/values/BACKEND_URL_${CIRCLE_WORKFLOW_ID:0:7}`
-            export API_URL="http://${BACKEND_URL}:3030"
+            export API_URL="https://${BACKEND_URL}:3030"
             export NODE_ENV=production
 
             echo ENVIRONMENT=production > ".env"
@@ -480,8 +480,8 @@ jobs:
             cat .circleci/ansible/inventory.txt
             export BACKEND_URL=$(sed -n 2p .circleci/ansible/inventory.txt)
            
-            echo `curl -s http://${BACKEND_URL}:3030/api/status`
-            curl http://${BACKEND_URL}:3030/api/status
+            echo `curl -s https://${BACKEND_URL}:3030/api/status`
+            curl https://${BACKEND_URL}:3030/api/status
       - run:
           name: Frontend smoke test.
           command: |
