@@ -29,6 +29,10 @@ Resources:
         Origins:
           - DomainName: !Sub "udapeople-${WorkflowID}.s3.amazonaws.com"
             Id: webpage
+            CustomOriginConfig:
+              HTTPPort: 80
+              HTTPSPort: 443
+              OriginProtocolPolicy: http-only
             S3OriginConfig:
               OriginAccessIdentity: !Sub "origin-access-identity/cloudfront/${CloudFrontOriginAccessIdentity}"
         Enabled: True

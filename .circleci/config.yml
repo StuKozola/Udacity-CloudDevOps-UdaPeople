@@ -481,13 +481,7 @@ jobs:
             export BACKEND_URL=$(sed -n 2p .circleci/ansible/inventory.txt)
            
             echo `curl -s http://${BACKEND_URL}:3030/api/status`
-            
-            if curl -s http://${BACKEND_URL}:3030/api/status | grep "satus:ok"
-            then
-              return 1
-            else
-              return 0
-            fi
+            curl http://${BACKEND_URL}:3030/api/status
       - run:
           name: Frontend smoke test.
           command: |
