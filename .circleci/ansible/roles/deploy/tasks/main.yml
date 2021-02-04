@@ -26,5 +26,5 @@
 - name: Build and run PM2 server
   shell: |
     cd ~/backend
-    sudp npm run build:prod
+    sudo npm run build:prod
     pm2 start npm --name backend -- start

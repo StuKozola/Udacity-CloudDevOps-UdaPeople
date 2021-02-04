@@ -56,6 +56,7 @@ commands:
           command: |
             echo ANSIBLE_HOST_KEY_CHECKING=False > "backend/.env"
             echo ENVIRONMENT=production >> "backend/.env"
+            echo NODE_ENV=production >> "backend/.env"
             echo TYPEORM_CONNECTION=postgres >> "backend/.env"
             echo TYPEORM_ENTITIES=./src/modules/domain/**/*.entity.ts >> "backend/.env"
             echo TYPEORM_MIGRATIONS=./src/migrations/*.ts >> "backend/.env"
@@ -67,6 +68,10 @@ commands:
             echo TYPEORM_PASSWORD=$TYPEORM_PASSWORD >> "backend/.env"
             echo TYPEORM_DATABASE=$TYPEORM_DATABASE >> "backend/.env"
             cat backend/.env
+      - persist_to_workspace:
+        root: ~/
+        paths:
+          - project/backend/.env
 
   slack-fail-notify:
     description: Send failure notification to slack
