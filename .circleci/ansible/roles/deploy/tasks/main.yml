@@ -1,21 +1,25 @@
-- name: Copy backend files
-  become: true
-  copy:
-    src: /home/backend.tar.gz
-    dest: /home/ubuntu/backend.tar.gz
+- name: Maker directory for install
+  become_user: ubuntu
+  shell: mkdir -p ~/backend
 
-- name: Install dependencies
+- name: Extract backend to folder
+  become_user: ubuntu
+  unarchive:
+    src: /home/backend.tar.gz
+    dest: ~/backend
+    owner: ubuntu
+    group: ubuntu
+    mode: 0755
+
+- name: Install dependencies and build
   shell: |
-    cd /home/ubuntu/
-    tar xzvf backend.tar.gz
-    mv home/circleci/project/backend .
-    cd backend
+    cd ~/backend
     npm install -g npm@latest
     npm install -g webpack-dev-server
     npm install
     npm run build
 
-- name: Build and run PM2 server
+- name: Run PM2 server
   shell: |
     cd backend
     pm2 start npm --name backend -- start
