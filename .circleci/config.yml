@@ -159,7 +159,7 @@ jobs:
       - restore_cache:
           keys: [frontend-build]
       - run:
-          name: Build front-end
+          name: Build frontend
           command: |
             cd frontend
             sudo npm install
@@ -177,7 +177,7 @@ jobs:
       - restore_cache:
           keys: [backend-build]
       - run:
-          name: Back-end build
+          name: Backend build
           command: |
              cd backend
              sudo npm install
@@ -273,7 +273,7 @@ jobs:
               --stack-name "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}" \
               --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}"
       - run:
-          name: Add back-end ip to ansible inventory
+          name: Add back-end ip to ansible inventory file and memstash
           command: |
             BACKEND_URL=`aws ec2 describe-instances \
               --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:7}" \
@@ -421,11 +421,11 @@ jobs:
       - image: willhallonline/ansible:2.10-ubuntu-18.04
     steps:
       - checkout
-      - set-db-environment
       - add_ssh_keys:
           fingerprints: ["64:f5:b4:02:5b:76:87:e8:4c:fc:f6:0b:df:87:44:9b"]
       - attach_workspace:
           at: ~/
+      - set-db-environment
       - run:
           name: Install dependencies
           command: |
@@ -438,8 +438,8 @@ jobs:
       - run:
           name: Package backend
           command: |
-            cd /home
-            tar -czf backend.tar.gz -P /home/circleci/project/backend/dist
+            cd ~/
+            tar -czvf backend.tar.gz -P ~/circleci/project/backend/dist
       - run:
           name: Deploy backend
           command: |
