@@ -445,7 +445,6 @@ jobs:
             cd backend
             npm install
             npm run build
-            cd dist
             tar -czvf /home/backend.tar.gz ./*
       - run:
           name: Deploy backend
