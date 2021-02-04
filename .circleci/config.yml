@@ -186,9 +186,8 @@ jobs:
           name: Backend build
           command: |
              cd backend
-             cat .env
              sudo npm install
-             sudo npm run build:prod
+             sudo npm run build
       - save_cache:
           paths: [backend/node_modules]
           key: backend-build
@@ -342,12 +341,12 @@ jobs:
       - image: amazon/aws-cli
     steps:
       - checkout
-      - set-db-environment
       - run:
           name: Install dependencies
           command: |
             curl -sL https://rpm.nodesource.com/setup_12.x | bash -
             yum -y install nodejs npm tar gzip jq git
+      - set-db-environment
       - run:
           name: Run migrations
           command: |
@@ -445,7 +444,7 @@ jobs:
           command: |
             cd backend
             npm install
-            npm run build:prod
+            npm run build
             cd dist
             tar -czvf /home/backend.tar.gz ./*
       - run:
