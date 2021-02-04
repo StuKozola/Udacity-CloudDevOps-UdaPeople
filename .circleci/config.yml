@@ -181,12 +181,13 @@ jobs:
       - checkout
       - restore_cache:
           keys: [backend-build]
+      - set-db-environment
       - run:
           name: Backend build
           command: |
              cd backend
              sudo npm install
-             sudo npm run build
+             sudo npm run build:prod
       - save_cache:
           paths: [backend/node_modules]
           key: backend-build
@@ -443,7 +444,7 @@ jobs:
           command: |
             cd backend
             npm install
-            npm run build
+            npm run build:prod
             cd dist
             tar -czvf /home/backend.tar.gz ./*
       - run:
