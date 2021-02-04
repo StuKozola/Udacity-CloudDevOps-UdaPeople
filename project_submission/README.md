@@ -3,11 +3,11 @@
 ### 1. Selling CI/CD to team or organization 
 [presentation](presentation.pdf)
 ### 2. URLs
-- [Public URL to GitHub repository](https://github.com/StuKozola/Udacity-CloudDevOps-UdaPeople)
-- [Public URL to S3 Bucket]()
-- [Public URL to CloudFront distribution]()
-- [Public URL to backend application in EC2]()
-- [Public URL to Prometheus Server]()
+- [Public URL to GitHub repository][URL01]
+- [Public URL to S3 Bucket][URL02]
+- [Public URL to CloudFront distribution][URL03]
+- [Public URL to backend application in EC2][URL04]
+- [Public URL to Prometheus Server][URL05]
 ## 3. Screenshots
 1. Job failed because of compile errors
 
@@ -58,3 +58,8 @@
 
 ![image](screenshots/SCREENSHOT12.png)
 
+[URL01]: https://github.com/StuKozola/Udacity-CloudDevOps-UdaPeople/
+[URL02]: http://udapeople-da53854.s3-us-west-2.amazonaws.com/index.html
+[URL03]: http://dqxffzkcibkgw.cloudfront.net
+[URL04]: http://ec2-34-216-180-234.us-west-2.compute.amazonaws.com:3030/api/status
+[URL05]: http://ec2-35-160-142-195.us-west-2.compute.amazonaws.com:9090/
