@@ -447,7 +447,7 @@ jobs:
             cat .env
             npm install
             npm run build
-            tar -czvf /home/backend.tar.gz ./*
+            tar -pczvf /home/backend.tar.gz .
       - run:
           name: Deploy backend
           command: |
