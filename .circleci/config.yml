@@ -438,12 +438,12 @@ jobs:
       - run:
           name: Package backend
           command: |
-            cd ~/
-            tar -czvf backend.tar.gz -P ~/circleci/project/backend/dist
+            cd /home
+            tar -czvf backend.tar.gz -P /home/circleci/project/backend/dist
       - run:
           name: Deploy backend
           command: |
-            cd ~/project/.circleci/ansible
+            cd /home/circleci/project/.circleci/ansible
             export ANSIBLE_HOST_KEY_CHECKING=False
             ansible-playbook deploy-backend.yml --inventory-file=inventory.txt
       - run:
