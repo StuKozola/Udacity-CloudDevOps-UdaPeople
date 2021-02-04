@@ -431,7 +431,6 @@ jobs:
           fingerprints: ["64:f5:b4:02:5b:76:87:e8:4c:fc:f6:0b:df:87:44:9b"]
       - attach_workspace:
           at: ~/
-      - set-db-environment
       - run:
           name: Install dependencies
           command: |
@@ -439,6 +438,7 @@ jobs:
             apt -y install jq tar gzip git curl
             curl -sL https://deb.nodesource.com/setup_12.x | bash -
             apt -y install nodejs
+      - set-db-environment
       - run:
           name: Build and package backend
           command: |
