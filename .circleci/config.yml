@@ -443,7 +443,7 @@ jobs:
       - run:
           name: Deploy backend
           command: |
-            cd /home/circleci/project/.circleci/ansible
+            cd ~/project/.circleci/ansible
             export ANSIBLE_HOST_KEY_CHECKING=False
             ansible-playbook deploy-backend.yml --inventory-file=inventory.txt
       - run:
