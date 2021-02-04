@@ -186,6 +186,7 @@ jobs:
           name: Backend build
           command: |
              cd backend
+             cat .env
              sudo npm install
              sudo npm run build:prod
       - save_cache:
