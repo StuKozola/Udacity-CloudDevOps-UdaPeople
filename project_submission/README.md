@@ -59,7 +59,7 @@
 ![image](screenshots/SCREENSHOT12.png)
 
 [URL01]: https://github.com/StuKozola/Udacity-CloudDevOps-UdaPeople/
-[URL02]: http://udapeople-b43cf76.s3-us-west-2.amazonaws.com/index.html
+[URL02]: http://udapeople-cbe9a5d.s3-us-west-2.amazonaws.com/index.html
 [URL03]: http://dohw611dfltb6.cloudfront.net
-[URL04]: http://ec2-34-216-180-234.us-west-2.compute.amazonaws.com:3030/api/status
+[URL04]: http://ec2-54-244-185-84.us-west-2.compute.amazonaws.com:3030/api/status
 [URL05]: http://ec2-34-217-47-143.us-west-2.compute.amazonaws.com:9090/
