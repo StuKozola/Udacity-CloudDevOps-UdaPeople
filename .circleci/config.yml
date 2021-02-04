@@ -482,7 +482,7 @@ jobs:
            
             echo `curl -s http://${BACKEND_URL}:3030/api/status`
             
-            if curl -s http://${BACKEND_URL}:3030/api/status
+            if (curl -s http://${BACKEND_URL}:3030/api/status | grep "\"status\":\"ok\"")
             then
               return 1
             else
